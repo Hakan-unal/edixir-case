@@ -1,4 +1,4 @@
-import { Card, Form, Input, Button, Row, Col } from "antd";
+import { Card, Form, Input, Button, Row, Col, Tooltip } from "antd";
 import useLocalStorage from "../../hooks/useLocalStorage";
 import mockUser from "../../staticData/user.json";
 import { showNotification } from "../../components/general/notification";
@@ -38,37 +38,43 @@ const Login = (props: any) => {
           <Form
             name="basic"
             labelCol={{ span: 4 }}
-            wrapperCol={{ md:{span: 14, offset: 6} }}
+            wrapperCol={{ md: { span: 14, offset: 6 } }}
             initialValues={{ remember: true }}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             autoComplete="off"
             labelAlign="left"
           >
-            <Form.Item
-              label="Username"
-              name="username"
-              rules={[
-                { required: true, message: "Please input your username!" },
-              ]}
-            >
-              <Input addonBefore={<CiUser/>} allowClear />
-            </Form.Item>
+            <Tooltip title="Username: admin">
+              <Form.Item
+                label="Username"
+                name="username"
+                rules={[
+                  { required: true, message: "Please input your username!" },
+                ]}
+              >
+                <Input defaultValue={""} addonBefore={<CiUser />} allowClear />
+              </Form.Item>
+            </Tooltip>
+            <Tooltip title="Password: admin">
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[
+                  { required: true, message: "Please input your password!" },
+                ]}
+              >
+                <Input.Password addonBefore={<IoKeyOutline />} allowClear />
+              </Form.Item>
+            </Tooltip>
 
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[
-                { required: true, message: "Please input your password!" },
-              ]}
-            >
-              <Input.Password addonBefore={<IoKeyOutline/>} allowClear />
-            </Form.Item>
-
-            
-
-            <Form.Item wrapperCol={{md:{span: 14, offset: 10} }}>
-              <Button className="button-radius" block type="primary" htmlType="submit">
+            <Form.Item wrapperCol={{ md: { span: 14, offset: 10 } }}>
+              <Button
+                className="button-radius"
+                block
+                type="primary"
+                htmlType="submit"
+              >
                 Login
               </Button>
             </Form.Item>

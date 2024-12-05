@@ -2,134 +2,215 @@ import {
   Card,
   Col,
   Row,
+  Table,
   Typography,
-  Image,
+  Drawer,
+  Space,
+  Tooltip,
   Button,
-  Divider,
+  Form,
   Input,
-  Popover,
+  Select,
 } from "antd";
 import { useEffect, useState } from "react";
-import { LuFileSearch } from "react-icons/lu";
 import { getBooks } from "../../../service";
 import { showNotification } from "../../components/general/notification";
 import { CHANGED } from "../../../redux/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { AiOutlineLogout } from "react-icons/ai";
 import useLocalStorage from "../../hooks/useLocalStorage";
-import { Link } from "react-router-dom";
-
-const { Paragraph, Text } = Typography;
+import tableColumns from "../../staticData/tableColumns.json";
+import { BsPencil } from "react-icons/bs";
+import { FiTrash2 } from "react-icons/fi";
+import { HiOutlineUserPlus } from "react-icons/hi2";
+import { CiUser } from "react-icons/ci";
+import { IoKeyOutline } from "react-icons/io5";
 
 const Home = (props: any) => {
-  const [books, setBooks] = useState<any>(undefined);
-  const [searched, setSearched] = useState([]);
-  const [basket, setBasket] = useState([]);
   const dispatch = useDispatch();
   const globalState: any = useSelector((state) => state);
-  const [user, setUser] = useLocalStorage<any>("user", {})
+  const [user, setUser] = useLocalStorage<any>("user", {});
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isOpenUserEditModal, setIsOpenUserEditModal] =
+    useState<boolean>(false);
+  const [isOpenCreateDrawer, setIsOpenCreateDrawer] = useState<boolean>(false);
 
-  const handleBooks = async () => {
-    const response = await getBooks();
-    setBooks(response);
-    setSearched(response);
+  const [tableData, setTableData] = useState([]);
+
+  const columns = [
+    {
+      title: "#",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      showSorterTooltip: { target: "full-header" },
+      sorter: (a: any, b: any) => a.name.length - b.name.length,
+    },
+    {
+      title: "Surname",
+      dataIndex: "surname",
+      key: "surname",
+      showSorterTooltip: { target: "full-header" },
+      sorter: (a: any, b: any) => a.name.length - b.name.length,
+    },
+    {
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
+      showSorterTooltip: { target: "full-header" },
+      sorter: (a: any, b: any) => a.name.length - b.name.length,
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      filters: [
+        {
+          text: "Admin",
+          value: "Admin",
+        },
+        {
+          text: "Editor",
+          value: "Editor",
+        },
+        {
+          text: "Viewer",
+          value: "Viewer",
+        },
+      ],
+      onFilter: (value: any, record: any) =>
+        record.role.indexOf(value as string) === 0,
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <Tooltip title="Düzenle" color={"blue"}>
+            <BsPencil
+              onClick={handleEditDrawer}
+              className="cursorPointer"
+              size={16}
+              color="blue"
+            />
+          </Tooltip>
+
+          <Tooltip title="Sil" color={"red"}>
+            <FiTrash2 className="cursorPointer" size={16} color="red" />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  const handleEditDrawer = () => {
+    setIsOpenUserEditModal(!isOpenUserEditModal);
+  };
+  const handleCreateDrawer = () => {
+    setIsOpenCreateDrawer(!isOpenCreateDrawer);
   };
 
-  const handleInput = (event: any) => {
-    const val = event.target.value;
-    const tempArr = books?.filter((obj: any) =>
-      obj.name.toLowerCase().includes(val.toLowerCase(), 0)
-    );
-
-    setSearched(tempArr);
+  const onFinish = (values: any) => {
+    showNotification("success", "Başarılı", "", null);
   };
 
-  const handleLogout=()=>{
-    setUser(null)
-    dispatch({
-      type: CHANGED,
-      state: { basket: [] },
-    });
-  }
+  const onFinishFailed = (errorInfo: any) => {
+    showNotification("error", "Başarısız", "", null);
+  };
 
-  const addBasket = (obj: any) => {
-    const tempArr: any = [...basket];
-    tempArr.push(obj);
-    dispatch({
-      type: CHANGED,
-      state: { basket: tempArr },
-    });
-    setBasket(tempArr);
+  const handleChange = (value: string) => {
+    console.log(`selected ${value}`);
   };
 
   useEffect(() => {
-    handleBooks();
+    setTableData(tableColumns?.users as any);
   }, []);
 
-  useEffect(() => {
-    if (globalState.edixir) {
-      setBasket(globalState.edixir.state.basket);
-    }
-  }, [globalState]);
-
-  const BookCard = () => {
-    return searched?.map((obj: any, index: number) => (
-      <Col key={index} md={8} lg={6} xxl={4}>
-        <Card
-          extra={<Text type="success">{obj.price} TL</Text>}
-          hoverable
-          title={<Text ellipsis>{obj.name}</Text>}
-          cover={
-            <Image
-              width={"50%"}
-              style={{ marginLeft: 70, marginRight: 70 }}
-              preview={false}
-              src={obj.image}
-            />
-          }
-        >
-          <Paragraph>{obj.shortDescription}</Paragraph>
-
-          <div style={{ textAlign: "right" }}>
-            <Text strong>{obj.author}</Text>
-          </div>
-          <Divider />
-
-          <Row gutter={[12, 36]}>
-            <Col span={12}>
-              <Button onClick={() => addBasket(obj)} block>
-                Add Shopping{" "}
-              </Button>
-            </Col>
-            <Col span={12}>
-              <Button
-                block
-                onClick={() =>
-                  showNotification("info", obj.name, obj.description, null)
-                }
-              >
-                Detail
-              </Button>
-            </Col>
-          </Row>
-        </Card>
-      </Col>
-    ));
-  };
-
   return (
-    <Card title={<Link to={"/login"}><Popover content="Çıkış yapmak için tıklayınız"> <AiOutlineLogout  onClick={handleLogout} className="cursorPointer" size={30} /></Popover></Link> } >
-      <Input
-        allowClear
-        onChange={handleInput}
-        size="large"
-        prefix={<LuFileSearch size={20} />}
-      />
-      <Divider />
-      <Row align={"top"} gutter={[24, 36]}>
-        {BookCard()}
-      </Row>
-    </Card>
+    <Row gutter={[12, 36]} className="cursorPointer">
+      <Col>
+        <Button size="middle" onClick={handleCreateDrawer}>
+          {" "}
+          Create New User <HiOutlineUserPlus size={20} />
+        </Button>
+      </Col>
+      <Col span={24}>
+        <Table
+          size="large"
+          loading={loading}
+          dataSource={tableData}
+          columns={columns as any}
+        />
+      </Col>
+
+      {/**
+       * Create drawer
+       */}
+      <Drawer title="Create Form for New User" open={isOpenCreateDrawer} onClose={handleCreateDrawer}>
+        <Form
+          name="basic"
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+          labelAlign="left"
+          layout="vertical"
+        >
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: "Please input your name!" }]}
+          >
+            <Input allowClear />
+          </Form.Item>
+          <Form.Item
+            label="Surname"
+            name="surname"
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Input allowClear />
+          </Form.Item>
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Input allowClear />
+          </Form.Item>
+          <Form.Item
+            label="Role"
+            name="role"
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Select
+              onChange={handleChange}
+              options={[
+                { value: "Admin", label: "Admin" },
+                { value: "Viewer", label: "Viewer" },
+                { value: "Editor", label: "Editor" },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              className="button-radius"
+              block
+              htmlType="submit"
+            >
+              Create
+            </Button>
+          </Form.Item>
+        </Form>
+      </Drawer>
+
+      {/**
+       * Edit drawer
+       */}
+      <Drawer open={isOpenUserEditModal} onClose={handleEditDrawer}></Drawer>
+    </Row>
   );
 };
 

@@ -1,8 +1,8 @@
 import { combineReducers } from "redux";
-import { konzek } from "./konzek/reducers";
+import { edixir } from "./edixir/reducers";
 
 const reducers = combineReducers({
-    konzek: konzek,
+    edixir: edixir,
 });
 
 export default reducers;

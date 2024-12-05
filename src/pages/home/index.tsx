@@ -104,7 +104,7 @@ const Home = (props: any) => {
   const handleEditDrawer = (obj: any) => {
     console.log(obj);
 
-    editForm.setFieldsValue(obj)
+    editForm.setFieldsValue(obj);
     setIsOpenEditDrawer(!isOpenEditDrawer);
   };
   const handleCreateDrawer = () => {
@@ -114,6 +114,8 @@ const Home = (props: any) => {
 
   const onFinishCreateForm = (values: any) => {
     showNotification("success", "Başarılı", "", null);
+
+    // handle service values
   };
 
   const onFinishFailedCreateForm = (errorInfo: any) => {
@@ -122,6 +124,8 @@ const Home = (props: any) => {
 
   const onFinishEditForm = (values: any) => {
     showNotification("success", "Başarılı", "", null);
+
+    // handle service values
   };
 
   const onFinishFailedEditForm = (errorInfo: any) => {
@@ -244,10 +248,6 @@ const Home = (props: any) => {
           </Form.Item>
         </Form>
       </Drawer>
-
-
-
-
 
       {/**
        * Edit drawer

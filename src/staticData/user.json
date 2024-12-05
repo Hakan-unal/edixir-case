@@ -1,0 +1,48 @@
+{
+    "username": "test",
+    "departman": "blabla",
+    "accessToken": "blablablablabla",
+    "refreshToken": "blablablabla",
+    "authorization": [
+        {
+            "name": "Performans",
+            "path": "/performance",
+            "id": 1
+        },
+        {
+            "name": "Personel",
+            "path": "/personel",
+            "id": 2
+        },
+        {
+            "name": "Chat",
+            "path": "/chat",
+            "id": 3
+        },
+        {
+            "name": "Eğitim",
+            "path": "/education",
+            "id": 4
+        },
+        {
+            "name": "Sertifika",
+            "path": "/certificate",
+            "id": 5
+        },
+        {
+            "name": "IK",
+            "path": "/ik",
+            "id": 6
+        },
+        {
+            "name": "İletişim",
+            "path": "/communication",
+            "id": 7
+        },
+        {
+            "name": "Yetkili",
+            "path": "/auth",
+            "id": 8
+        }
+    ]
+}

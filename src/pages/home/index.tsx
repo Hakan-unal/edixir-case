@@ -1,9 +1,7 @@
 import {
-  Card,
   Col,
   Row,
   Table,
-  Typography,
   Drawer,
   Space,
   Tooltip,
@@ -13,29 +11,25 @@ import {
   Select,
 } from "antd";
 import { useEffect, useState } from "react";
-import { getBooks } from "../../../service";
 import { showNotification } from "../../components/general/notification";
-import { CHANGED } from "../../../redux/constants";
-import { useDispatch, useSelector } from "react-redux";
-import useLocalStorage from "../../hooks/useLocalStorage";
-import tableColumns from "../../staticData/tableColumns.json";
 import { BsPencil } from "react-icons/bs";
 import { FiTrash2 } from "react-icons/fi";
 import { HiOutlineUserPlus } from "react-icons/hi2";
-import { CiUser } from "react-icons/ci";
-import { IoKeyOutline } from "react-icons/io5";
+import {
+  handlePost,
+  handleUpdate,
+  handleGetAllUser,
+  handleDelete,
+} from "./service";
 
 const Home = (props: any) => {
-  const dispatch = useDispatch();
-  const globalState: any = useSelector((state) => state);
-  const [loading, setLoading] = useState<boolean>(false);
   const [isOpenCreateDrawer, setIsOpenCreateDrawer] = useState<boolean>(false);
   const [isOpenEditDrawer, setIsOpenEditDrawer] = useState<boolean>(false);
+  const [currentData, setCurrentData] = useState({});
 
   const [tableData, setTableData] = useState([]);
   const [createForm] = Form.useForm();
   const [editForm] = Form.useForm();
-  const [currentUser, setCurrentUser] = useState<any>({});
 
   const columns = [
     {
@@ -94,17 +88,21 @@ const Home = (props: any) => {
           </Tooltip>
 
           <Tooltip title="Sil" color={"red"}>
-            <FiTrash2 className="cursorPointer" size={16} color="red" />
+            <FiTrash2
+              onClick={() => handleDeleteUser(record.id)}
+              className="cursorPointer"
+              size={16}
+              color="red"
+            />
           </Tooltip>
         </Space>
       ),
     },
   ];
 
-  const handleEditDrawer = (obj: any) => {
-    console.log(obj);
-
+  const handleEditDrawer = (obj?: any) => {
     editForm.setFieldsValue(obj);
+    setCurrentData(obj);
     setIsOpenEditDrawer(!isOpenEditDrawer);
   };
   const handleCreateDrawer = () => {
@@ -112,10 +110,22 @@ const Home = (props: any) => {
     createForm.resetFields();
   };
 
-  const onFinishCreateForm = (values: any) => {
-    showNotification("success", "Başarılı", "", null);
+  const handleDeleteUser = (ID: number) => {
+    showNotification(
+      "success",
+      "Başarılı",
+      ID + " id'li Kullanıcı Silindi",
+      null
+    );
+    handleDelete(ID);
+    refreshTableData();
+  };
 
-    // handle service values
+  const onFinishCreateForm = (values: any) => {
+    showNotification("success", "Başarılı", "Kullanıcı Oluşturuldu", null);
+    handlePost(values);
+    refreshTableData();
+    handleCreateDrawer();
   };
 
   const onFinishFailedCreateForm = (errorInfo: any) => {
@@ -123,20 +133,30 @@ const Home = (props: any) => {
   };
 
   const onFinishEditForm = (values: any) => {
-    showNotification("success", "Başarılı", "", null);
-
-    // handle service values
+    showNotification("success", "Başarılı", "Kullanıcı Güncellendi", null);
+    handleUpdate({
+      ...currentData,
+      ...values,
+    });
+    refreshTableData();
+    handleEditDrawer();
   };
 
   const onFinishFailedEditForm = (errorInfo: any) => {
     showNotification("error", "Başarısız", "Zorunlu Alanları Doldurun", null);
   };
+
   const handleChange = (value: string) => {
     console.log(`selected ${value}`);
   };
 
+  const refreshTableData = () => {
+    const tableData = handleGetAllUser();
+    setTableData(tableData);
+  };
+
   useEffect(() => {
-    setTableData(tableColumns?.users as any);
+    refreshTableData();
   }, []);
 
   return (
@@ -148,12 +168,7 @@ const Home = (props: any) => {
         </Button>
       </Col>
       <Col span={24}>
-        <Table
-          size="large"
-          loading={loading}
-          dataSource={tableData}
-          columns={columns as any}
-        />
+        <Table size="large" dataSource={tableData} columns={columns as any} />
       </Col>
 
       {/**
